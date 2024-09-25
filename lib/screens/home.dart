@@ -31,6 +31,7 @@ class _HomeScreenState extends State<HomeScreen> {
     final titleController = TextEditingController();
     final descriptionController = TextEditingController();
     DateTime selectedDate = DateTime.now();
+    final _formKey = GlobalKey<FormState>();
 
     showDialog(
       context: context,
@@ -38,50 +39,70 @@ class _HomeScreenState extends State<HomeScreen> {
         return AlertDialog(
           title: Text('Add Todo'),
           content: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                TextField(
+            child: Form(
+              key: _formKey,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  TextFormField(
                     controller: titleController,
-                    decoration: InputDecoration(labelText: 'Title')),
-                TextField(
-                    controller: descriptionController,
-                    decoration: InputDecoration(labelText: 'Description')),
-                SizedBox(height: 20),
-                TextButton(
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(' Date: ${DateFormat.yMMMd().format(selectedDate)}'),
-                      Icon(Icons.calendar_today)
-                    ],
+                    decoration: InputDecoration(labelText: 'Title'),
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Please enter a title';
+                      }
+                      return null;
+                    },
                   ),
-                  onPressed: () async {
-                    DateTime? pickedDate = await showDatePicker(
-                      context: context,
-                      initialDate: selectedDate,
-                      firstDate: DateTime(2000),
-                      lastDate: DateTime(2101),
-                    );
-                    if (pickedDate != null) {
-                      selectedDate = pickedDate;
-                    }
-                  },
-                ),
-              ],
+                  TextFormField(
+                    controller: descriptionController,
+                    decoration: InputDecoration(labelText: 'Description'),
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Please enter a description';
+                      }
+                      return null;
+                    },
+                  ),
+                  SizedBox(height: 20),
+                  TextButton(
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                            'Date: ${DateFormat.yMMMd().format(selectedDate)}'),
+                        Icon(Icons.calendar_today)
+                      ],
+                    ),
+                    onPressed: () async {
+                      DateTime? pickedDate = await showDatePicker(
+                        context: context,
+                        initialDate: selectedDate,
+                        firstDate: DateTime(2000),
+                        lastDate: DateTime(2101),
+                      );
+                      if (pickedDate != null) {
+                        selectedDate = pickedDate;
+                      }
+                    },
+                  ),
+                ],
+              ),
             ),
           ),
           actions: [
             TextButton(
               onPressed: () {
-                final newTodo = Todo(
-                  title: titleController.text,
-                  description: descriptionController.text,
-                  date: selectedDate,
-                );
-                _todoBox.add(newTodo);
-                _loadTodos();
-                Navigator.of(context).pop();
+                if (_formKey.currentState!.validate()) {
+                  final newTodo = Todo(
+                    title: titleController.text,
+                    description: descriptionController.text,
+                    date: selectedDate,
+                  );
+                  _todoBox.add(newTodo);
+                  _loadTodos();
+                  Navigator.of(context).pop();
+                }
               },
               child: Text('Add'),
             ),
@@ -96,6 +117,7 @@ class _HomeScreenState extends State<HomeScreen> {
     final titleController = TextEditingController(text: todo.title);
     final descriptionController = TextEditingController(text: todo.description);
     DateTime selectedDate = todo.date;
+    final _formKey = GlobalKey<FormState>();
 
     showDialog(
       context: context,
@@ -103,48 +125,67 @@ class _HomeScreenState extends State<HomeScreen> {
         return AlertDialog(
           title: Text('Edit Todo'),
           content: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                TextField(
+            child: Form(
+              key: _formKey,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  TextFormField(
                     controller: titleController,
-                    decoration: InputDecoration(labelText: 'Title')),
-                TextField(
-                    controller: descriptionController,
-                    decoration: InputDecoration(labelText: 'Description')),
-                TextButton(
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                          'Select Date: ${DateFormat.yMMMd().format(selectedDate)}'),
-                      Icon(Icons.calendar_today)
-                    ],
+                    decoration: InputDecoration(labelText: 'Title'),
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Please enter a title';
+                      }
+                      return null;
+                    },
                   ),
-                  onPressed: () async {
-                    DateTime? pickedDate = await showDatePicker(
-                      context: context,
-                      initialDate: selectedDate,
-                      firstDate: DateTime(2000),
-                      lastDate: DateTime(2101),
-                    );
-                    if (pickedDate != null) {
-                      selectedDate = pickedDate;
-                    }
-                  },
-                ),
-              ],
+                  TextFormField(
+                    controller: descriptionController,
+                    decoration: InputDecoration(labelText: 'Description'),
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Please enter a description';
+                      }
+                      return null;
+                    },
+                  ),
+                  TextButton(
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                            'Select Date: ${DateFormat.yMMMd().format(selectedDate)}'),
+                        Icon(Icons.calendar_today)
+                      ],
+                    ),
+                    onPressed: () async {
+                      DateTime? pickedDate = await showDatePicker(
+                        context: context,
+                        initialDate: selectedDate,
+                        firstDate: DateTime(2000),
+                        lastDate: DateTime(2101),
+                      );
+                      if (pickedDate != null) {
+                        selectedDate = pickedDate;
+                      }
+                    },
+                  ),
+                ],
+              ),
             ),
           ),
           actions: [
             TextButton(
               onPressed: () {
-                todo.title = titleController.text;
-                todo.description = descriptionController.text;
-                todo.date = selectedDate;
-                _todoBox.putAt(index, todo);
-                _loadTodos();
-                Navigator.of(context).pop();
+                if (_formKey.currentState!.validate()) {
+                  todo.title = titleController.text;
+                  todo.description = descriptionController.text;
+                  todo.date = selectedDate;
+                  _todoBox.putAt(index, todo);
+                  _loadTodos();
+                  Navigator.of(context).pop();
+                }
               },
               child: Text('Update'),
             ),
